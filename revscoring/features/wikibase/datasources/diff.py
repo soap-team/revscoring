@@ -13,8 +13,8 @@ class Diff(DependentSet):
     def __init__(self, name, revision_datasources):
         super().__init__(name)
 
-        self.revision_item = revision_datasources.item
-        self.parent_item = revision_datasources.parent.item
+        self.revision_entity = revision_datasources.entity
+        self.parent_entity = revision_datasources.parent.entity
 
         # sitelinks
         self.sitelinks_diff = Datasource(
@@ -65,18 +65,18 @@ class Diff(DependentSet):
 
         self.claims_added = Datasource(
             name + ".claims_added", _process_claims_added,
-            depends_on=[self.properties_diff, self.parent_item,
-                        self.revision_item]
+            depends_on=[self.properties_diff, self.parent_entity,
+                        self.revision_entity]
         )
         self.claims_removed = Datasource(
             name + ".claims_removed", _process_claims_removed,
-            depends_on=[self.properties_diff, self.parent_item,
-                        self.revision_item]
+            depends_on=[self.properties_diff, self.parent_entity,
+                        self.revision_entity]
         )
         self.claims_changed = Datasource(
             name + ".claims_changed", _process_claims_changed,
-            depends_on=[self.properties_diff, self.parent_item,
-                        self.revision_item]
+            depends_on=[self.properties_diff, self.parent_entity,
+                        self.revision_entity]
         )
         self.sources_added = Datasource(
             name + ".sources_added", _process_sources_added,
@@ -134,41 +134,41 @@ class dict_diff_field(Datasource):
         return getattr(diff, self.field_name)
 
 
-def _process_claims_added(properties_diff, past_item, current_item):
+def _process_claims_added(properties_diff, past_entity, current_entity):
     claims_added = []
     for property in properties_diff.added:
-        claims_added += current_item.claims[property]
+        claims_added += current_entity.claims[property]
     for property in properties_diff.changed:
-        parent_guids = {claim.snak for claim in past_item.claims[property]}
-        for claim in current_item.claims[property]:
+        parent_guids = {claim.snak for claim in past_entity.claims[property]}
+        for claim in current_entity.claims[property]:
             if claim.snak not in parent_guids:
                 claims_added.append(claim)
 
     return claims_added
 
 
-def _process_claims_removed(properties_diff, past_item, current_item):
+def _process_claims_removed(properties_diff, past_entity, current_entity):
     claims_removed = []
     for property in properties_diff.removed:
-        claims_removed += past_item.claims[property]
+        claims_removed += past_entity.claims[property]
     for property in properties_diff.changed:
         current_guids = {claim.snak
-                         for claim in past_item.claims[property]}
-        for claim in past_item.claims[property]:
+                         for claim in past_entity.claims[property]}
+        for claim in past_entity.claims[property]:
             if claim.snak not in current_guids:
                 claims_removed.append(claim)
 
     return claims_removed
 
 
-def _process_claims_changed(properties_diff, past_item, current_item):
+def _process_claims_changed(properties_diff, past_entity, current_entity):
     claims_changed = []
     for property in properties_diff.changed:
         parent_guids = {claim.snak: claim
-                        for claim in past_item.claims[property]}
-        for claim in current_item.claims[property]:
+                        for claim in past_entity.claims[property]}
+        for claim in current_entity.claims[property]:
             if claim.snak in parent_guids and \
-               claim not in past_item.claims[property]:
+               claim not in past_entity.claims[property]:
                 claims_changed.append((parent_guids[claim.snak], claim))
 
     return claims_changed

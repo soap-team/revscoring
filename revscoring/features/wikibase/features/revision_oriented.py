@@ -23,7 +23,7 @@ class Revision(DependentSet):
         "`int` : A count of properties in the revision"
         self.claims = aggregators.len(self.datasources.claims)
         "`int` : A count of claims in the revision"
-        self.sources = aggregators.len(self.datasources.sources)
+        self.references = aggregators.sum(self.datasources.references)
         "`int` : A count of sources in the revision"
         self.qualifiers = aggregators.len(self.datasources.qualifiers)
         "`int` : A count of qualifiers in the revision"
@@ -79,16 +79,16 @@ class Revision(DependentSet):
             name = self._name + ".has_property_value({0}, {1})" \
                 .format(repr(property), repr(value))
 
-        return HasPropertyValue(name, property, value, self.datasources.item)
+        return HasPropertyValue(name, property, value, self.datasources.entity)
 
 
 class HasPropertyValue(Feature):
-    def __init__(self, name, property, value, item_datasource):
+    def __init__(self, name, property, value, entity_datasource):
         self.property = property
         self.value = value
         super().__init__(name, self._process, returns=bool,
-                         depends_on=[item_datasource])
+                         depends_on=[entity_datasource])
 
-    def _process(self, item):
-        values = item.claims.get(self.property, [])
-        return self.value in (i.target for i in values)
+    def _process(self, entity):
+        values = entity.properties.get(self.property, [])
+        return self.value in (i.claim.datavalue.id for i in values)

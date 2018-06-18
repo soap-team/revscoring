@@ -19,22 +19,22 @@ has_p106_test = revision.has_property_value('P106', "Test")
 has_p999_foo = revision.has_property_value('P999', "Foo")
 
 
-def test_item_doc():
-    solve(revision.datasources.item_doc, cache={r_text: ALAN_TEXT})
-    assert solve(revision.datasources.item_doc, cache={r_text: None}) is None
+def test_text():
+    solve(revision.datasources.text, cache={r_text: ALAN_TEXT})
+    assert solve(revision.datasources.text, cache={r_text: None}) is None
 
-    assert (pickle.loads(pickle.dumps(revision.datasources.item_doc)) ==
-            revision.datasources.item_doc)
+    assert (pickle.loads(pickle.dumps(revision.datasources.text)) ==
+            revision.datasources.text)
 
 
-def test_item():
-    assert solve(revision.datasources.item, cache={r_text: None}).claims == {}
+def test_entity():
+    assert solve(revision.datasources.entity, cache={r_text: None}).properties == {}
 
-    solve(revision.datasources.item, cache={r_text: ALAN_TEXT})
+    solve(revision.datasources.entity, cache={r_text: ALAN_TEXT})
 
-    assert (pickle.loads(pickle.dumps(revision.datasources.item)) ==
-            revision.datasources.item)
-
+    assert (pickle.loads(pickle.dumps(revision.datasources.entity)) ==
+            revision.datasources.entity)
+    print(revision)
     assert solve(revision.properties, cache={r_text: ALAN_TEXT}) == 57
     assert (solve(revision.datasources.properties,
                   cache={r_text: ALAN_TEXT}).keys() ==
@@ -47,35 +47,18 @@ def test_item():
              'P345', 'P949', 'P1263', 'P549', 'P184', 'P935', 'P349', 'P213'})
 
     assert solve(revision.claims, cache={r_text: ALAN_TEXT}) == 71
-    assert (solve(revision.datasources.claims, cache={r_text: ALAN_TEXT}) ==
-            {('P646', '/m/0n00'), ('P101', 'Q897511'), ('P20', 'Q2011497'),
-             ('P166', 'Q10762848'), ('P800', 'Q20895949'), ('P950', 'XX945020'),
-             ('P1816', 'mp18700'), ('P1563', 'Turing'),
-             ('P569', '+1912-06-23T00:00:00Z'), ('P19', 'Q122744'),
-             ('P691', 'jn19990008646'), ('P185', 'Q249984'), ('P1343', 'Q2627728'),
-             ('P512', 'Q21578'), ('P69', 'Q2278254'), ('P101', 'Q21198'),
-             ('P800', 'Q772056'), ('P108', 'Q230899'), ('P25', 'Q20895935'),
-             ('P1263', '952/000023883'), ('P214', '41887917'),
-             ('P1296', '0067958'), ('P106', 'Q82594'), ('P106', 'Q4964182'),
-             ('P1273', 'a11455408'), ('P1412', 'Q1860'), ('P1207', 'n98045497'),
-             ('P910', 'Q9384007'), ('P140', 'Q7066'), ('P1430', '368'),
-             ('P69', 'Q924289'),
-             ('P2021', 'WbQuantity(amount=5, upperBound=5, lowerBound=5, unit=1)'),
-             ('P463', 'Q123885'), ('P166', 'Q15631401'),
-             ('P373', 'Alan Turing'), ('P549', '8014'),
-             ('P213', '0000 0001 1058 9902'), ('P1417', '609739'),
-             ('P27', 'Q145'), ('P21', 'Q6581097'), ('P268', '12205670t'),
-             ('P184', 'Q92741'), ('P1196', 'Q10737'), ('P244', 'n83171546'),
-             ('P22', 'Q20895930'), ('P269', '030691621'), ('P1741', '226316'),
-             ('P106', 'Q81096'), ('P935', 'Alan Turing'), ('P1006', '070580685'),
-             ('P69', 'Q21578'), ('P227', '118802976'), ('P906', '254262'),
-             ('P349', '00621580'), ('P535', '12651680'), ('P91', 'Q6636'),
-             ('P106', 'Q11513337'), ('P345', 'nm6290133'), ('P31', 'Q5'),
-             ('P570', '+1954-06-07T00:00:00Z'), ('P18', 'Alan Turing Aged 16.jpg'),
-             ('P735', 'Q294833'), ('P512', 'Q230899'), ('P1343', 'Q17329836'),
-             ('P1415', '101036578'), ('P106', 'Q170790'), ('P1819', 'I00586443'),
-             ('P949', '000133188'), ('P19', 'Q20895942'), ('P800', 'Q20895966'),
-             ('P108', 'Q220798')})
+    property_ids = set([i[0] for i in solve(revision.datasources.claims,
+                                        cache={r_text: ALAN_TEXT})])
+    assert (property_ids == set(['P91', 'P569', 'P268', 'P549', 'P535', 'P108',
+    'P735', 'P570', 'P1343', 'P106', 'P1430', 'P269', 'P1819', 'P646', 'P512',
+    'P101', 'P214', 'P1343', 'P1296', 'P800', 'P69', 'P184', 'P1816', 'P463',
+    'P1273', 'P25', 'P19', 'P1563', 'P140', 'P949', 'P1196', 'P166', 'P691',
+    'P800', 'P27', 'P213', 'P800', 'P2021', 'P106', 'P227', 'P1415', 'P373',
+    'P1412', 'P244', 'P108', 'P166', 'P1417', 'P935', 'P1207', 'P910', 'P22',
+    'P185', 'P69', 'P1741', 'P950', 'P106', 'P18', 'P106', 'P31', 'P349',
+    'P1263', 'P69', 'P345', 'P906', 'P106', 'P19', 'P20', 'P21', 'P1006',
+    'P512', 'P101']))
+            
     assert solve(revision.aliases, cache={r_text: ALAN_TEXT}) == 9
     assert (solve(revision.datasources.aliases, cache={r_text: ALAN_TEXT}) ==
             {'de': ['Alan Mathison Turing'], 'en': ['Alan Mathison Turing'],
@@ -84,8 +67,8 @@ def test_item():
              'ko': ['앨런 매티슨 튜링'],
              'be-tarask': ["Элан Т'юрынг", 'Алан Цюрынг', "Т'юрынг"],
              'ja': ['アラン・テューリング']})
-    assert solve(revision.sources, cache={r_text: ALAN_TEXT}) == 53
-    assert (solve(revision.datasources.sources, cache={r_text: ALAN_TEXT}) ==
+    assert solve(revision.references, cache={r_text: ALAN_TEXT}) == 71
+    assert (solve(revision.datasources.references, cache={r_text: ALAN_TEXT}) ==
             {('P19', 'Q122744', 0), ('P570', '+1954-06-07T00:00:00Z', 1),
              ('P19', 'Q122744', 1), ('P570', '+1954-06-07T00:00:00Z', 2),
              ('P570', '+1954-06-07T00:00:00Z', 3), ('P535', '12651680', 0),
