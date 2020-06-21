@@ -58,5 +58,8 @@ def _lookup_keys(keys, d):
         for key in keys:
             d = d[key]
     except KeyError:
+        if ('.').join(keys) == 'slots.main.*':
+            d = d['*']
+            return d
         raise KeyError(keys)
     return d
