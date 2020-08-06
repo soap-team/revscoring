@@ -3,6 +3,8 @@ from itertools import islice
 
 import mwapi
 
+import random
+
 from ...datasources import Datasource, revision_oriented
 from ...dependencies import expand
 from ...errors import QueryNotSupported, RevisionNotFound, UserNotFound
@@ -241,6 +243,7 @@ class Extractor(BaseExtractor):
             else:
                 doc = self.session.get(action='query', prop='revisions',
                                        revids=batch_ids, rvslots='main',
+                                       cb=random.randint(1,1000000),
                                        **params)
 
                 for page_doc in doc['query'].get('pages', {}).values():
